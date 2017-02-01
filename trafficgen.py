@@ -12,37 +12,30 @@ logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
  
 # GET String
-getStr = "GET / HTTP/1.0\r\nHOST: www.google.com\r\n\r\n"
+getStr = "GET / HTTP/1.0\r\nHOST: web.epi.com\r\n\r\n"
 while True:
 	# Set up target IP
 	
 	 
 	# Generate random source port number
 	port=RandNum(1024,65535)
+	# Generate Random web traffic simulation to web.epi.com (192.168.20.20)
 	rnd_src_ip = "" + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) 
-
 	ip=IP(src=rnd_src_ip, dst="192.168.20.20")
 
 	# Create SYN packet
 	SYN=ip/TCP(sport=port, dport=80, flags="S", seq=0)
 	 
-	# Send SYN and receive SYN,ACK
-	print "\n[*] Sending SYN packet"
+	# Send SYN and don't wait for SYN,ACK since we won't get it due to random src.
+	# timeout immediately.
 	SYNACK=sr1(SYN, timeout = 0.25)
-	print "\n[*] Receiving SYN,ACK packet"
 	 
-	# Create ACK packet
+	# Forge an ACK
 	ACK=ip/TCP(sport=port, dport=80, flags="A", seq=1, ack=1) / getStr
 	 
 	# SEND our ACK packet
 	print "\n[*] Sending ACK-GET packet"
 	error,reply = sr(ACK, timeout=0.25)
-
-	print "Reply from server: \n"
-	for r in reply:
-	  print r.show()
-	 
-	print "\n[*] Done!"
 
 
 	# Generate random IP and send SYN packets to 80, 3306, and 22
