@@ -4,54 +4,42 @@
 # This has the intention of making it more difficult for blue teams
 # in cyber warfare games to identify the red teams IP
 
+# Change log level to suppress annoying IPv6 error
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+ 
+# Import scapy
 from scapy.all import *
-src_ip = "10.1.20.38"
-dst_ip = "10.1.20.1"
-src_port = RandNum(1024, 65535)
-dst_port = 80
+ 
+# GET String
+getStr = "GET / HTTP/1.0\r\nHOST: www.google.com\r\n\r\n"
 
-dst_url = "www.google.com"
-# Send the SYN
-#syn = IP(dst=dst_url) / TCP(dport=dst_port, flags='S')
-#syn
-
-# Get the SYN-ACK
-#syn_ack = sr1(syn)
-
-#print "Received syn_ack: " + syn_ack
-#getStr = "GET / HTTP/1.1\r\nHost: www.docs.kali.org\r\n\r\n"
-
-
-#request = IP(dst=dst_url) / TCP(dport=dst_port, sport=syn_ack[TCP].dport,
-#             seq=syn_ack[TCP].ack, ack=syn_ack[TCP].seq + 1, flags='A') / getStr
-
-#reply = sr1(request)
-#print "Got reply: \n\t" + reply
-
-#getRequest = IP(src=src_ip, dst=dst_url) / TCP(dport=dst_port) / getStr
-#send(getRequest)
-
-#reply = sr1(getRequest)
-#print "Got GET request reply:\n\t"
-#print getRequest
-
-#Create SYN packet and send
-ip = IP(dst=dst_url)
-SYN = ip/TCP(sport=src_port, dport=dst_port, flags="S", seq=42)
-print "Sending SYN \n"
-
-# Receive SYN,ACK
+# Set up target IP
+ip=IP(dst="www.google.com")
+ 
+# Generate random source port number
+port=RandNum(1024,65535)
+ 
+# Create SYN packet
+SYN=ip/TCP(sport=port, dport=80, flags="S", seq=42)
+ 
+# Send SYN and receive SYN,ACK
+print "\n[*] Sending SYN packet"
 SYNACK=sr1(SYN)
-print "Receiving SYN,ACK \n"
-
+print "\n[*] Receiving SYN,ACK packet"
+ 
 # Create ACK packet
-ACK=ip/TCP(sport=SYNACK.dport, dport=dst_port, flags="A", seq=SYNACK.ack, ack=SYNACK.seq + 1)
+ACK=ip/TCP(sport=SYNACK.dport, dport=80, flags="A", seq=SYNACK.ack, ack=SYNACK.seq + 1) / getStr
+ 
+# SEND our ACK packet
+print "\n[*] Sending ACK-GET packet"
+error,reply = sr(ACK, multi=1, timeout=1)
 
-print "Sending ACK Packet \n"
-send(ACK)
-
-print "Done!"
-
+print "Reply from server: \n"
+for r in reply:
+  print r.show()
+ 
+print "\n[*] Done!"
 
 
 
