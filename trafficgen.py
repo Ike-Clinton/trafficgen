@@ -96,13 +96,13 @@ while True:
 		for i in range(0, RandNum(10, 20)):
 			# Send random packet 90% of the time 	
 			num = RandNum(0, 10)
-			if num > 1:
-				rnd_src_ip = "" + str(10) + "." + str(RandNum(0, 254)) + "." + str(RandNum(0, 254)) + "." + str(RandNum(2, 254))
+			if num > 3:
+				rnd_src_ip = "" + str(10) + "." + str(RandNum(1)) + "." + str(RandNum(50, 200)) + "." + str(RandNum(2, 254))
 				res, unans = sr( IP(src= rnd_src_ip, dst=dst_ip)/TCP(flags='S', sport=port, dport=(RandNum(20, 1024))), timeout = 0.1)
 
 		for i in range(0, RandNum(10, 20)):
 			# Send web traffic to help mask red team 	
 			num = RandNum(0, 10)
-			if num > 1:
-				rnd_src_ip = "" + str(10) + "." + str(1) + "." + str(RandNum(0, 254)) + "." + str(RandNum(2, 254))
+			if num > 3:
+				rnd_src_ip = "" + str(10) + "." + str(1) + "." + str(RandNum(50, 200)) + "." + str(RandNum(2, 254))
 				res, unans = sr( IP(src= rnd_src_ip, dst=dst_ip)/TCP(flags='S', sport=port, dport=(80)), timeout = 0.1)
